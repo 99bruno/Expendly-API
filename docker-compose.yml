@@ -1,0 +1,33 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: expendly-api
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:8000"
+    environment:
+      - ENV=production
+    volumes:
+      - .:/expendly
+    command: gunicorn expendly.expendly.wsgi:application --bind 0.0.0.0:8000
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: postgres-expendly
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - .:/docker-entrypoint-initdb.d
+
+volumes:
+  postgres_data:
